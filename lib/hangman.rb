@@ -1,10 +1,12 @@
 class Hangman
   attr_reader :turns
+  attr_reader :incorrect
 
   def initialize
     @word = get_word
     @letters = Hash.new
     @turns = @word.length
+    @incorrect = Array.new
   end
 
   def to_s
@@ -33,12 +35,11 @@ class Hangman
     end
   end
 
-  def play(letter)
-    unless end?
-      make_guess(letter)
-      puts "\n#{state}\n\n#{turns} moves left."
-    else
-      puts "\n#{state}\n\nGame over."
+  def play(guess)
+    unless turns == 0 || game_won?
+      puts "Wrong guess!" unless make_guess guess
+      puts "\n#{to_s}\n\nWrong guesses: #{incorrect.join(', ')}\n#{turns} moves left."
+      puts "\nGame over!\nCorrect word was: #{word}\n" if turns == 0 || game_won?
     end
   end
 
@@ -55,21 +56,31 @@ class Hangman
       get_dict.sample.chomp
     end
 
-    def make_guess(letter)
+    def make_guess(guess)
       self.turns -= 1
-      puts "Wrong letter!\n" unless add_guess(letter)
-      self.state = correct_letters
+      if guess.length == 1
+        result = add_guess guess
+        self.state = correct_letters
+      else
+        result = whole_guess guess
+      end
+      incorrect << guess unless result
+      return result
     end
 
     def add_guess(letter)
       @letters[letter.downcase] = word.downcase.include?(letter)
     end
 
+    def whole_guess(guess)
+      self.state = word if guess == word
+    end
+
     def correct_letters
       word.chars.collect {|letter| @letters[letter.downcase] ? letter : " _ "} * ''
     end
 
-    def end?
-      state == word || turns == 0
+    def game_won?
+      state == word
     end
 end
