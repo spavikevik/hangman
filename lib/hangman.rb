@@ -1,6 +1,5 @@
 class Hangman
   attr_reader :turns
-  attr_reader :incorrect
 
   def initialize
     @word = get_word
@@ -36,17 +35,28 @@ class Hangman
   end
 
   def play(guess)
-    unless turns == 0 || game_won?
-      puts "Wrong guess!" unless make_guess guess
-      puts "\n#{to_s}\n\nWrong guesses: #{incorrect.join(', ')}\n#{turns} moves left."
-      puts "\nGame over!\nCorrect word was: #{word}\n" if turns == 0 || game_won?
+    unless turns == 0 || won?
+      make_guess guess
     end
+  end
+
+  def wrong_guesses
+    incorrect.join(', ')
+  end
+
+  def won?
+    state == word
+  end
+
+  def get_secret_word
+    word if turns == 0
   end
 
   private
     attr_accessor :word
     attr_writer :turns
     attr_accessor :state
+    attr_accessor :incorrect
 
     def get_dict
       File.readlines("5desk.txt").select {|word| word.chomp.length.between?(5,12)}
@@ -78,9 +88,5 @@ class Hangman
 
     def correct_letters
       word.chars.collect {|letter| @letters[letter.downcase] ? letter : " _ "} * ''
-    end
-
-    def game_won?
-      state == word
     end
 end
