@@ -1,10 +1,10 @@
 class Hangman
   attr_reader :turns
 
-  def initialize(loaded = false, opts = {})
-    @word = opts[:word] || get_word unless loaded
-    @letters = opts[:letters] || Hash.new
-    @turns = opts[:turns] || @word.length
+  def initialize
+    @word = get_word
+    @letters = Hash.new
+    @turns = @word.length
   end
 
   def to_s
@@ -26,7 +26,11 @@ class Hangman
 
   def self.load(filename)
     file = "saved/#{filename}.dat"
-    Marshal.load (File.binread(file))
+    begin
+      Marshal.load (File.binread(file))
+    rescue
+      puts "No such file!"
+    end
   end
 
   def play(letter)
